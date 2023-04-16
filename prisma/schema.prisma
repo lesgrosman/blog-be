@@ -13,6 +13,8 @@ datasource db {
 model User {
   id           String   @id @default(cuid())
   username     String   @unique
+  firstName    String
+  lastName     String
   password     String
   posts        Post[]
   comments     Comment[]
@@ -36,7 +38,6 @@ model Post {
   perex     String
   content   String
   slug      String
-  imageUrl  String
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
   comments  Comment[]
