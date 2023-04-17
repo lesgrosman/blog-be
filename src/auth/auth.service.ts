@@ -15,6 +15,7 @@ import { JwtPayload } from './jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { UserProfile } from './types';
+import { exclude } from '../utils';
 
 @Injectable()
 export class AuthService {
@@ -77,16 +78,11 @@ export class AuthService {
       where: {
         id,
       },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        username: true,
-        createdAt: true,
-      },
     });
 
-    return foundUser;
+    const returnedUser = exclude(foundUser, ['password', 'updatedAt']);
+
+    return returnedUser;
   }
 
   async updateUser(
@@ -104,16 +100,11 @@ export class AuthService {
         firstName,
         lastName,
       },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        username: true,
-        createdAt: true,
-      },
     });
 
-    return updatedUser;
+    const returnedUser = exclude(updatedUser, ['password', 'updatedAt']);
+
+    return returnedUser;
   }
 
   async deleteUser(user: User): Promise<void> {
