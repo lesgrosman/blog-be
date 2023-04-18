@@ -30,6 +30,16 @@ export class AuthService {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    const isExistedUser = await this.prismaService.user.findUnique({
+      where: {
+        username,
+      },
+    });
+
+    if (isExistedUser) {
+      throw new ConflictException('The username is already exists');
+    }
+
     try {
       await this.prismaService.user.create({
         data: {
@@ -40,11 +50,7 @@ export class AuthService {
         },
       });
     } catch (e) {
-      if ((e.code = 'P2002')) {
-        throw new ConflictException('Username already exists');
-      } else {
-        throw new InternalServerErrorException();
-      }
+      throw new InternalServerErrorException(e.message);
     }
   }
 
