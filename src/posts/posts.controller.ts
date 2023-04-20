@@ -35,15 +35,15 @@ export class PostsController {
   }
 
   @Post()
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard('jwt'))
   async createPost(@GetUser() user: User, @Body() postDto: PostDto) {
     return this.postsService.createPost(user, postDto);
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard('jwt'))
   async updatePost(
-    @Param() id: string,
+    @Param('id') id: string,
     @GetUser() user: User,
     @Body() postDto: PostDto,
   ) {
