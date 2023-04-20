@@ -78,7 +78,7 @@ export class PostsService {
         content,
         slug,
         categories: {
-          connect: categories,
+          connect: categories.map((category) => ({ id: category.id })),
         },
         author: {
           connect: {
@@ -96,10 +96,11 @@ export class PostsService {
       where: {
         id,
       },
-      select: {
-        authorId: true,
-      },
     });
+
+    if (!foundPost) {
+      throw new NotFoundException('Post does not exist');
+    }
 
     if (foundPost.authorId !== user.id) {
       throw new UnauthorizedException('You cannot update this post');
@@ -126,7 +127,7 @@ export class PostsService {
         content,
         slug,
         categories: {
-          connect: categories,
+          connect: categories.map((category) => ({ id: category.id })),
         },
         author: {
           connect: {
@@ -148,9 +149,9 @@ export class PostsService {
       },
     });
 
-    if (!updatedPost) {
-      throw new NotFoundException();
-    }
+    // if (!updatedPost) {
+    //   throw new NotFoundException();
+    // }
 
     return updatedPost;
   }
