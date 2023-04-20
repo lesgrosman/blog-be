@@ -149,9 +149,9 @@ export class PostsService {
       },
     });
 
-    // if (!updatedPost) {
-    //   throw new NotFoundException();
-    // }
+   if (!updatedPost) {
+     throw new NotFoundException();
+   }
 
     return updatedPost;
   }
