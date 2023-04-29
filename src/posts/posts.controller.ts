@@ -24,7 +24,7 @@ export class PostsController {
   }
 
   @Get('my')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard('jwt'))
   async getMyPosts(@GetUser() user: User) {
     return this.postsService.getMyPosts(user);
   }
@@ -51,7 +51,7 @@ export class PostsController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard('jwt'))
   deleteTask(@GetUser() user: User, @Param('id') id: string) {
     return this.postsService.deletePost(id, user);
   }
