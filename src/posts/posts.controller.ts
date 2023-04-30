@@ -23,7 +23,7 @@ export class PostsController {
     return this.postsService.getAllPosts();
   }
 
-  @Get('my')
+  @Get('my-posts')
   @UseGuards(AuthGuard('jwt'))
   async getMyPosts(@GetUser() user: User) {
     return this.postsService.getMyPosts(user);
