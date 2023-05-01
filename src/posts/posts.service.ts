@@ -182,7 +182,7 @@ export class PostsService {
     return post;
   }
 
-  async deletePost(id: string, user: User): Promise<string> {
+  async deletePost(id: string, user: User): Promise<{ id: string }> {
     const foundPost = await this.prismaService.post.findUnique({
       where: {
         id,
@@ -223,6 +223,6 @@ export class PostsService {
       },
     });
 
-    return id;
+    return { id };
   }
 }
