@@ -7,12 +7,14 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from '@prisma/client';
 import { PostDto } from './dto/post.dto';
+import { MyPostsInput } from './types';
 
 @Controller('posts')
 export class PostsController {
@@ -25,8 +27,8 @@ export class PostsController {
 
   @Get('my-posts')
   @UseGuards(AuthGuard('jwt'))
-  async getMyPosts(@GetUser() user: User) {
-    return this.postsService.getMyPosts(user);
+  async getMyPosts(@Query() filter: MyPostsInput, @GetUser() user: User) {
+    return this.postsService.getMyPosts(filter, user);
   }
 
   @Get(':id')
