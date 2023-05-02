@@ -5,13 +5,17 @@ import {
 } from '@nestjs/common';
 import { Post, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { PostDetail, PostItem } from './types';
+import { MyPostsResponse, PostDetail, PostItem, MyPostsInput } from './types';
 import { PostDto } from './dto/post.dto';
 import { exclude } from 'src/utils';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class PostsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private readonly dbService: DatabaseService,
+  ) {}
 
   async getAllPosts(): Promise<PostItem[]> {
     const allPosts = await this.prismaService.post.findMany({
@@ -34,28 +38,10 @@ export class PostsService {
     return returnedProsts;
   }
 
-  async getMyPosts(user: User): Promise<PostItem[]> {
-    const myPosts = await this.prismaService.post.findMany({
-      where: {
-        authorId: user.id,
-      },
-      include: {
-        categories: true,
-        author: {
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            createdAt: true,
-          },
-        },
-      },
-    });
+  async getMyPosts(filter: MyPostsInput, user: User): Promise<MyPostsResponse> {
+    const myPosts = await this.dbService.findMyPosts(filter, user.id);
 
-    const returnedProsts = myPosts.map((post) => exclude(post, ['content']));
-
-    return returnedProsts;
+    return myPosts;
   }
 
   async createPost(user: User, post: PostDto): Promise<Post> {
@@ -113,7 +99,11 @@ export class PostsService {
       .map((word) => word.toLowerCase())
       .join('-');
 
-    const categories = await this.prismaService.category.findMany({
+    const unusedCategories = await this.prismaService.category.findMany({
+      where: { id: { notIn: post.categories.map((category) => category.id) } },
+    });
+
+    const newCategories = await this.prismaService.category.findMany({
       where: { id: { in: post.categories.map((category) => category.id) } },
     });
 
@@ -127,7 +117,8 @@ export class PostsService {
         content,
         slug,
         categories: {
-          connect: categories.map((category) => ({ id: category.id })),
+          disconnect: unusedCategories.map((category) => ({ id: category.id })),
+          connect: newCategories.map((category) => ({ id: category.id })),
         },
         author: {
           connect: {
