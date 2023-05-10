@@ -18,7 +18,7 @@ export type MyPostsInput = {
 } & SortInput &
   Omit<Pagination, 'count'>;
 
-export type MyPostsResponse = {
+export type PostsResponse = {
   posts: PostItem[];
   pagination: Pagination;
 };
