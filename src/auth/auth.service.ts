@@ -16,13 +16,14 @@ import { JwtPayload } from './jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { AuthResponse, Tokens, UserProfile } from './types';
-import { exclude } from '../utils';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
+    private readonly dbService: DatabaseService,
   ) {}
 
   async signup(signupCredentialsDto: SignupCredentialsDto): Promise<void> {
@@ -113,15 +114,9 @@ export class AuthService {
   async getUser(user: User): Promise<UserProfile> {
     const { id } = user;
 
-    const foundUser = await this.prismaService.user.findUnique({
-      where: {
-        id,
-      },
-    });
+    const foundUser = await this.dbService.findUser(id);
 
-    const returnedUser = exclude(foundUser, ['password', 'updatedAt']);
-
-    return returnedUser;
+    return foundUser;
   }
 
   async updateUser(
@@ -129,48 +124,14 @@ export class AuthService {
     updateUserDto: UpdateUserDto,
   ): Promise<UserProfile> {
     const { id } = user;
-    const { firstName, lastName } = updateUserDto;
 
-    const updatedUser = await this.prismaService.user.update({
-      where: {
-        id,
-      },
-      data: {
-        firstName,
-        lastName,
-      },
-    });
+    const updatedUser = await this.dbService.updateUser(id, updateUserDto);
 
-    const returnedUser = exclude(updatedUser, ['password', 'updatedAt']);
-
-    return returnedUser;
+    return updatedUser;
   }
 
   async deleteUser(user: User): Promise<void> {
     const { id } = user;
-
-    await this.prismaService.comment.deleteMany({
-      where: {
-        authorId: id,
-      },
-    });
-
-    await this.prismaService.post.deleteMany({
-      where: {
-        authorId: id,
-      },
-    });
-
-    await this.prismaService.like.deleteMany({
-      where: {
-        authorId: id,
-      },
-    });
-
-    await this.prismaService.user.delete({
-      where: {
-        id: user.id,
-      },
-    });
+    await this.dbService.deleteUser(id);
   }
 }
