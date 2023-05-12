@@ -304,6 +304,16 @@ export class DatabaseService {
     return comments;
   }
 
+  async findPostCommentById(commentId: string): Promise<Comment> {
+    const comment = await this.prisma.comment.findUnique({
+      where: {
+        id: commentId,
+      },
+    });
+
+    return comment;
+  }
+
   async createPostComment(
     postId: string,
     userId: string,
@@ -328,6 +338,16 @@ export class DatabaseService {
     });
 
     return createdComment;
+  }
+
+  async deletePostComment(commentId: string): Promise<{ id: string }> {
+    const { id } = await this.prisma.comment.delete({
+      where: {
+        id: commentId,
+      },
+    });
+
+    return { id };
   }
 
   private createMyPostsWhere(filter: MyPostsInput, userId: string): object {

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '@prisma/client';
@@ -9,18 +17,24 @@ import { CommentDto } from './dto/comment.dto';
 export class CommentsController {
   constructor(private commentsService: CommentsService) {}
 
-  @Get(':id')
-  async getPostComments(@Param('id') id: string) {
-    return this.commentsService.getPostComments(id);
+  @Get(':postId')
+  async getPostComments(@Param('postId') postId: string) {
+    return this.commentsService.getPostComments(postId);
   }
 
-  @Post(':id')
+  @Post(':postId')
   @UseGuards(AuthGuard('jwt'))
   async createPostComment(
     @GetUser() user: User,
-    @Param('id') id: string,
+    @Param('postId') postId: string,
     @Body() commentDto: CommentDto,
   ) {
-    return this.commentsService.createPostComment(id, user, commentDto);
+    return this.commentsService.createPostComment(postId, user, commentDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
+  async deletePostComment(@GetUser() user: User, @Param('id') id: string) {
+    return this.commentsService.deletePostComment(id, user);
   }
 }
