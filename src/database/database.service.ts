@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Post } from '@prisma/client';
+import { Comment, Post } from '@prisma/client';
 import { UpdateUserDto } from 'src/auth/dto/auth-credentials.dto';
 import { UserProfile } from 'src/auth/types';
+import { CommentDto } from 'src/comments/dto/comment.dto';
+import { PostComment } from 'src/comments/types';
 import { PostDto } from 'src/posts/dto/post.dto';
 import {
   MyPostsInput,
@@ -278,6 +280,54 @@ export class DatabaseService {
     });
 
     return id;
+  }
+
+  // comments
+  async findPostComments(postId: string): Promise<PostComment[]> {
+    const comments = await this.prisma.comment.findMany({
+      where: {
+        postId,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    return comments;
+  }
+
+  async createPostComment(
+    postId: string,
+    userId: string,
+    comment: CommentDto,
+  ): Promise<Comment> {
+    const { content } = comment;
+
+    const createdComment = this.prisma.comment.create({
+      data: {
+        content,
+        author: {
+          connect: {
+            id: userId,
+          },
+        },
+        post: {
+          connect: {
+            id: postId,
+          },
+        },
+      },
+    });
+
+    return createdComment;
   }
 
   private createMyPostsWhere(filter: MyPostsInput, userId: string): object {
