@@ -53,7 +53,7 @@ export class PostsService {
     const updatedPost = await this.dbService.updatePost(id, user.id, post);
 
     if (!updatedPost) {
-      throw new NotFoundException();
+      throw new NotFoundException('Not Found');
     }
 
     return updatedPost;
