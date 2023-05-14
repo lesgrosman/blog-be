@@ -22,6 +22,8 @@ import { User } from '@prisma/client';
 import { AuthPayload } from './types';
 import { refreshTokenCookieName } from 'src/shared/constants';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { RefreshResponse, SignInResponse } from './swagger/responses';
 
 export const Cookies = createParamDecorator(
   (data: string, ctx: ExecutionContext) => {
@@ -38,6 +40,7 @@ const cookieExtractor = (req: Request): string | null => {
   return token;
 };
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -48,6 +51,7 @@ export class AuthController {
   }
 
   @Post('signin')
+  @ApiCreatedResponse({ type: SignInResponse })
   async signin(
     @Body() signinCredentialsDto: SigninCredentialsDto,
     @Res({ passthrough: true }) res: Response,
@@ -78,6 +82,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @ApiCreatedResponse({ type: RefreshResponse })
   async refreshToken(
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
